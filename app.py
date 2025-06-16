@@ -101,6 +101,43 @@ elif selected == "Tentang":
     **Disclaimer:** Aplikasi ini bukan pengganti konsultasi dengan tenaga medis profesional.
     """)
 
+    st.markdown("---")
+    st.subheader("🤖 Tanya Jawab Seputar Kulit Wajah")
+
+    with st.chat_message("assistant"):
+        st.markdown("Halo! Saya **SkinBot**, siap membantu kamu. Silakan ketik pertanyaan kamu tentang kulit wajah!")
+
+    # Simpan riwayat chat di session_state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_input = st.chat_input("Tulis pertanyaan...")
+
+    if user_input:
+        st.session_state.chat_history.append(("user", user_input))
+
+        # === Logika chatbot berbasis kata kunci ===
+        jawaban = "Maaf, saya belum mengerti pertanyaan itu. Coba tanyakan hal lain ya!"
+
+        if "jerawat" in user_input.lower():
+            jawaban = "Jerawat bisa disebabkan oleh hormon, stres, atau makanan berminyak. Cuci muka rutin dan gunakan obat yang sesuai."
+        elif "pucat" in user_input.lower():
+            jawaban = "Wajah pucat bisa menandakan kekurangan zat besi. Cobalah konsumsi sayur hijau atau konsultasi ke dokter."
+        elif "ruam" in user_input.lower() or "kemerahan" in user_input.lower():
+            jawaban = "Ruam biasanya disebabkan oleh iritasi atau alergi. Hindari produk baru dan gunakan krim penenang."
+        elif "obat" in user_input.lower():
+            jawaban = "Untuk jerawat ringan, gunakan benzoyl peroxide. Untuk kemerahan, bisa pakai hidrokortison ringan."
+        elif "bercak" in user_input.lower():
+            jawaban = "Bercak kuning pada wajah bisa disebabkan oleh infeksi bakteri atau jamur. Gunakan salep antibakteri atau antijamur ringan."
+
+        st.session_state.chat_history.append(("bot", jawaban))
+
+    # === Tampilkan riwayat chat ===
+    for role, msg in st.session_state.chat_history:
+        with st.chat_message("user" if role == "user" else "assistant"):
+            st.markdown(msg)
+
+
 # === Halaman Pemeriksaan ===
 elif selected == "Pemeriksaan":
     st.title("🯪 Deteksi Penyakit Kulit via Kamera")
