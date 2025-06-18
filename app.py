@@ -9,23 +9,12 @@ from streamlit_option_menu import option_menu
 # === Konfigurasi halaman ===
 st.set_page_config(page_title="Deteksi Penyakit Kulit", layout="wide")
 
-# === CSS untuk tampilan modern ===
+# === CSS Modern ===
 st.markdown("""
     <style>
-        body {
-            background-color: #f0f2f6;
-        }
-        .stSidebar {
-            background-color: #e3e7ed;
-        }
-        .title-center {
-            text-align: center;
-        }
-        .judul-aplikasi {
-            font-size: 36px;
-            color: #0066cc;
-            font-weight: bold;
-        }
+        body { background-color: #f0f2f6; }
+        .stSidebar { background-color: #e3e7ed; }
+        .judul-aplikasi { font-size: 36px; color: #0066cc; font-weight: bold; text-align: center; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -33,6 +22,7 @@ st.markdown("""
 if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
+# === State Default ===
 if "mulai_deteksi" not in st.session_state:
     st.session_state.mulai_deteksi = False
 if "last_saved" not in st.session_state:
@@ -48,17 +38,16 @@ selected = option_menu(
     orientation="horizontal"
 )
 
+# === Model Deteksi Wajah ===
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # === Halaman Beranda ===
 if selected == "Beranda":
-    st.markdown(f"""
-        <div style='text-align: center; padding: 2rem 0;'>
-            <h1 style='font-size: 3rem; color: #00A8E8;'>🌿 SkinScan</h1>
-            <p style='font-size: 1.2rem;'>Deteksi gejala kulit wajah dengan kamera </p>
-        </div>
+    st.markdown("""
+        <div class='judul-aplikasi'>🌿 SkinScan</div>
+        <p style='text-align:center;'>Deteksi gejala kulit wajah dengan kamera</p>
     """, unsafe_allow_html=True)
-    st.info("Silakan buka menu **Pemeriksaan** dan isi data diri terlebih dahulu.")
+    st.info("Silakan buka menu Pemeriksaan dan isi data diri terlebih dahulu.")
 
 # === Halaman Riwayat ===
 elif selected == "Riwayat":
@@ -78,6 +67,7 @@ elif selected == "Riwayat":
                                 <h4>👤 {row['Nama']} — {row['Tanggal']} {row['Waktu']}</h4>
                                 <p>Usia: {row['Usia']} | Jenis Kelamin: {row['Jenis Kelamin']}</p>
                                 <p>Gejala: {row['Gejala']}</p>
+                                <p>Saran Obat: {row['Hasil Saran Obat']}</p>
                             </div>
                         """, unsafe_allow_html=True)
                         if os.path.exists(row['Gambar']):
@@ -95,19 +85,27 @@ elif selected == "Riwayat":
 elif selected == "Tentang":
     st.title("ℹ️ Tentang Aplikasi")
     st.markdown("""
-    Aplikasi ini dikembangkan untuk membantu pengguna mendeteksi gejala umum penyakit kulit wajah
-    seperti ruam, kemerahan, bercak kuning, dan jerawat secara cepat menggunakan kamera webcam.
+    Selamat datang di SkinScan – solusi cerdas untuk memantau kesehatan kulit Anda secara cepat dan praktis.
+Kami adalah tim pengembang yang peduli terhadap kesehatan dan kecantikan kulit, serta berkomitmen menghadirkan teknologi terkini dalam bidang deteksi dini penyakit kulit melalui kamera dan kecerdasan buatan.
 
-    **Disclaimer:** Aplikasi ini bukan pengganti konsultasi dengan tenaga medis profesional.
+Aplikasi SkinScan dirancang untuk membantu pengguna mendeteksi berbagai permasalahan kulit wajah, seperti jerawat, ruam, bercak kuning, atau tanda-tanda wajah pucat yang dapat mengindikasikan kondisi kesehatan tertentu.
+Dengan dukungan analisis visual berbasis AI dan tampilan yang user-friendly, kami ingin memberikan kemudahan bagi siapa saja untuk lebih memahami kondisi kulit mereka, kapan pun dan di mana pun.
+
+Kami percaya bahwa deteksi dini adalah langkah pertama menuju perawatan yang tepat. Karena itu, SkinScan terus dikembangkan dan diperbarui untuk memberikan hasil analisis yang lebih akurat dan saran yang lebih tepat sesuai kebutuhan Anda.
+
+Terima kasih telah mempercayakan perawatan kulit Anda bersama SkinScan.
+Kami selalu terbuka untuk saran dan masukan demi pengembangan aplikasi yang lebih baik di masa depan.
+
+
+
+    Disclaimer: Aplikasi ini bukan pengganti konsultasi dengan tenaga medis profesional.
     """)
-
     st.markdown("---")
     st.subheader("🤖 Tanya Jawab Seputar Kulit Wajah")
 
     with st.chat_message("assistant"):
-        st.markdown("Halo! Saya **SkinBot**, siap membantu kamu. Silakan ketik pertanyaan kamu tentang kulit wajah!")
+        st.markdown("Halo! Saya SkinBot, siap bantu kamu. Ketik pertanyaanmu ya!")
 
-    # Simpan riwayat chat di session_state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
@@ -115,33 +113,29 @@ elif selected == "Tentang":
 
     if user_input:
         st.session_state.chat_history.append(("user", user_input))
-
-        # === Logika chatbot berbasis kata kunci ===
-        jawaban = "Maaf, saya belum mengerti pertanyaan itu. Coba tanyakan hal lain ya!"
+        jawaban = "Maaf, saya belum mengerti. Coba tanyakan hal lain ya!"
 
         if "jerawat" in user_input.lower():
             jawaban = "Jerawat bisa disebabkan oleh hormon, stres, atau makanan berminyak. Cuci muka rutin dan gunakan obat yang sesuai."
         elif "pucat" in user_input.lower():
-            jawaban = "Wajah pucat bisa menandakan kekurangan zat besi. Cobalah konsumsi sayur hijau atau konsultasi ke dokter."
+            jawaban = "Wajah pucat bisa menandakan kekurangan zat besi. Konsumsi sayur hijau atau konsultasi ke dokter."
         elif "ruam" in user_input.lower() or "kemerahan" in user_input.lower():
             jawaban = "Ruam biasanya disebabkan oleh iritasi atau alergi. Hindari produk baru dan gunakan krim penenang."
         elif "obat" in user_input.lower():
             jawaban = "Untuk jerawat ringan, gunakan benzoyl peroxide. Untuk kemerahan, bisa pakai hidrokortison ringan."
         elif "bercak" in user_input.lower():
-            jawaban = "Bercak kuning pada wajah bisa disebabkan oleh infeksi bakteri atau jamur. Gunakan salep antibakteri atau antijamur ringan."
+            jawaban = "Bercak kuning bisa disebabkan infeksi bakteri atau jamur. Gunakan salep antibakteri/antijamur ringan."
 
         st.session_state.chat_history.append(("bot", jawaban))
 
-    # === Tampilkan riwayat chat ===
     for role, msg in st.session_state.chat_history:
         with st.chat_message("user" if role == "user" else "assistant"):
             st.markdown(msg)
 
-
 # === Halaman Pemeriksaan ===
 elif selected == "Pemeriksaan":
     st.title("🯪 Deteksi Penyakit Kulit via Kamera")
-    st.markdown("Aplikasi interaktif untuk mendeteksi ruam, kemerahan, bercak kuning, dan jerawat pada kulit wajah secara langsung.")
+    st.markdown("Aplikasi interaktif untuk mendeteksi ruam, kemerahan, bercak kuning, dan jerawat pada kulit wajah.")
 
     st.sidebar.header("🧝‍♂️ Data Diri Pengguna")
     nama = st.sidebar.text_input("Nama Lengkap", "")
@@ -153,7 +147,6 @@ elif selected == "Pemeriksaan":
         st.sidebar.warning("⚠️ Masukkan nama lengkap terlebih dahulu.")
         st.stop()
 
-    st.sidebar.markdown("---")
     st.sidebar.header("🔍 Pengaturan Deteksi")
     deteksi_ruam = st.sidebar.checkbox("Deteksi Ruam / Kemerahan", value=True)
     deteksi_bercak = st.sidebar.checkbox("Deteksi Bercak Kuning", value=True)
@@ -173,53 +166,40 @@ elif selected == "Pemeriksaan":
     saran_obat_placeholder = st.sidebar.empty()
 
     def deteksi_gejala_di_wajah(frame):
-        wajah_kuning_terdeteksi = False
-        wajah_pucat_terdeteksi = False
-        wajah_merah_terdeteksi = False
-        jerawat_terdeteksi = False
-
+        kuning, pucat, merah, jerawat = False, False, False, False
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-
+        faces = face_cascade.detectMultiScale(gray, 1.1, 5)
         for (x, y, w, h) in faces:
-            wajah = frame[y:y + h, x:x + w]
+            wajah = frame[y:y+h, x:x+w]
             hsv = cv2.cvtColor(wajah, cv2.COLOR_BGR2HSV)
 
             if deteksi_bercak:
-                kuning_bawah = np.array([20, 100, 100])
-                kuning_atas = np.array([35, 255, 255])
-                mask_kuning = cv2.inRange(hsv, kuning_bawah, kuning_atas)
-                if cv2.countNonZero(mask_kuning) > sensitivitas_bercak:
-                    wajah_kuning_terdeteksi = True
-                    cv2.putText(frame, "Bercak Kuning", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+                kuning_mask = cv2.inRange(hsv, np.array([20, 100, 100]), np.array([35, 255, 255]))
+                if cv2.countNonZero(kuning_mask) > sensitivitas_bercak:
+                    kuning = True
+                    cv2.putText(frame, "Bercak Kuning", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,255,255), 2)
 
             if deteksi_ruam:
-                merah_bawah = np.array([0, 70, 50])
-                merah_atas = np.array([10, 255, 255])
-                mask_merah = cv2.inRange(hsv, merah_bawah, merah_atas)
-                if cv2.countNonZero(mask_merah) > sensitivitas_ruam:
-                    wajah_merah_terdeteksi = True
-                    cv2.putText(frame, "Ruam/Kemerahan", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                merah_mask = cv2.inRange(hsv, np.array([0, 70, 50]), np.array([10, 255, 255]))
+                if cv2.countNonZero(merah_mask) > sensitivitas_ruam:
+                    merah = True
+                    cv2.putText(frame, "Ruam", (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,255), 2)
 
             if deteksi_jerawat:
-                mask_merah_jerawat = cv2.inRange(hsv, merah_bawah, merah_atas)
-                contours, _ = cv2.findContours(mask_merah_jerawat, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                contours, _ = cv2.findContours(merah_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 for cnt in contours:
-                    area = cv2.contourArea(cnt)
-                    if 30 < area < sensitivitas_jerawat:
-                        jerawat_terdeteksi = True
+                    if 30 < cv2.contourArea(cnt) < sensitivitas_jerawat:
+                        jerawat = True
                         x1, y1, w1, h1 = cv2.boundingRect(cnt)
-                        cv2.rectangle(wajah, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 255), 1)
-                        cv2.putText(frame, "Jerawat", (x + x1, y + y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 255), 1)
+                        cv2.rectangle(wajah, (x1, y1), (x1+w1, y1+h1), (255,0,255), 1)
+                        cv2.putText(frame, "Jerawat", (x+x1, y+y1-5), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,0,255), 1)
 
-            rata2_saturasi = np.mean(hsv[:, :, 1])
-            if rata2_saturasi < 40:
-                wajah_pucat_terdeteksi = True
-                cv2.putText(frame, "Pucat", (x, y + h + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 2)
+            if np.mean(hsv[:,:,1]) < 40:
+                pucat = True
+                cv2.putText(frame, "Pucat", (x, y+h+40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200,200,200), 2)
 
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (100, 255, 100), 2)
-
-        return frame, wajah_kuning_terdeteksi, wajah_pucat_terdeteksi, wajah_merah_terdeteksi, jerawat_terdeteksi
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (100,255,100), 2)
+        return frame, kuning, pucat, merah, jerawat
 
     if start:
         st.subheader("📋 Data Pemeriksaan")
@@ -233,60 +213,55 @@ elif selected == "Pemeriksaan":
                 break
 
             frame = cv2.flip(frame, 1)
-            frame, wajah_kuning, wajah_pucat, wajah_merah, jerawat = deteksi_gejala_di_wajah(frame)
-            gejala_terdeteksi = any([wajah_kuning, wajah_pucat, wajah_merah, jerawat])
-            waktu_sekarang = datetime.datetime.now()
+            frame, kuning, pucat, merah, jerawat = deteksi_gejala_di_wajah(frame)
+            waktu = datetime.datetime.now()
+            gejala_terdeteksi = any([kuning, pucat, merah, jerawat])
 
-            if gejala_terdeteksi and (waktu_sekarang - st.session_state.last_saved).total_seconds() > 10:
-                timestamp = waktu_sekarang.strftime("%Y%m%d_%H%M%S")
-                screenshot_path = f"screenshots/deteksi_{timestamp}.jpg"
-                cv2.imwrite(screenshot_path, frame)
-                st.session_state.last_saved = waktu_sekarang
+            if gejala_terdeteksi and (waktu - st.session_state.last_saved).total_seconds() > 10:
+                timestamp = waktu.strftime("%Y%m%d_%H%M%S")
+                screenshot = f"screenshots/deteksi_{timestamp}.jpg"
+                cv2.imwrite(screenshot, frame)
+                st.session_state.last_saved = waktu
 
-                st.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), caption="📷 Gambar Deteksi Disimpan", use_container_width=True)
-                st.markdown("### 📑 Hasil Deteksi:")
+                st.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), caption="📷 Gambar Disimpan", use_container_width=True)
                 gejala_list = []
-                if wajah_kuning:
-                    gejala_list.append("Bercak Kuning")
-                if wajah_merah:
-                    gejala_list.append("Ruam / Kemerahan")
-                if wajah_pucat:
-                    gejala_list.append("Wajah Pucat")
-                if jerawat:
-                    gejala_list.append("Jerawat")
+                if kuning: gejala_list.append("Bercak Kuning")
+                if merah: gejala_list.append("Ruam / Kemerahan")
+                if pucat: gejala_list.append("Wajah Pucat")
+                if jerawat: gejala_list.append("Jerawat")
 
-                for g in gejala_list:
-                    st.success(f"✅ {g} terdeteksi")
+                saran = ""
+                if kuning: saran += "- Gunakan salep antijamur/antibiotik ringan.\n"
+                if merah: saran += "- Gunakan krim anti-inflamasi (hidrokortison).\n"
+                if pucat: saran += "- Periksa darah, konsumsi makanan bergizi.\n"
+                if jerawat: saran += "- Obat jerawat: benzoyl peroxide/salicylic acid.\n"
 
                 hasil = {
                     "Nama": nama,
                     "Usia": usia,
                     "Jenis Kelamin": gender,
                     "Tanggal": str(tanggal_pemeriksaan),
-                    "Waktu": waktu_sekarang.strftime("%H:%M:%S"),
+                    "Waktu": waktu.strftime("%H:%M:%S"),
                     "Gejala": ", ".join(gejala_list),
-                    "Gambar": screenshot_path
+                    "Gambar": screenshot,
+                    "Hasil Saran Obat": saran.replace('\n', ' ')
                 }
+
                 nama_file = f"riwayat_{nama.replace(' ', '_')}.csv"
                 pd.DataFrame([hasil]).to_csv(nama_file, mode='a', header=not os.path.exists(nama_file), index=False)
+
+                st.success("✅ Gejala terdeteksi:")
+                for g in gejala_list:
+                    st.write(f"- {g}")
+
+                with saran_obat_placeholder.container():
+                    st.markdown("### 💊 Saran Obat")
+                    st.markdown(saran)
             else:
                 frame_placeholder.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), channels="RGB", use_container_width=True)
-
-            saran_obat = ""
-            if wajah_kuning:
-                saran_obat += "- Gunakan salep antijamur atau antibiotik ringan.\n"
-            if wajah_merah:
-                saran_obat += "- Gunakan krim anti-inflamasi seperti hidrokortison.\n"
-            if wajah_pucat:
-                saran_obat += "- Periksa kadar hemoglobin, konsumsi makanan bergizi.\n"
-            if jerawat:
-                saran_obat += "- Gunakan obat jerawat dengan benzoyl peroxide atau salicylic acid.\n"
-
-            saran_obat_placeholder.markdown("#💊 Saran Obat")
-            if saran_obat:
-                saran_obat_placeholder.markdown(saran_obat)
-            else:
-                saran_obat_placeholder.markdown("Tidak ada gejala terdeteksi")
+                with saran_obat_placeholder.container():
+                    st.markdown("### 💊 Saran Obat")
+                    st.markdown("Tidak ada gejala terdeteksi.")
 
             if stop:
                 cap.release()
